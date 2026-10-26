@@ -1,50 +1,42 @@
-# 36.5°数字温控系统 V19（Android Native）
+# V19 Stable · 37.5℃ 数字温控系统（Android Native）
 
-V19 不再使用 WebView 承担主界面和媒体渲染。UI、模特动画、热力图轮播和双指缩放均为 Android 原生实现。
+这是可直接上传至 GitHub 仓库根目录的完整 Android 工程源代码（不包含 GitHub Actions Workflow）。
 
-## V19 关键变化
+## 此版界面规则
 
-- 原生 1920×1080 设计坐标系，按真实可用像素等比缩放；不受系统 DPI / fontScale 影响导致文字重排。
-- 左侧模特：120 帧原始 480×854 RGBA 素材无损合并为 Animated WebP，Android 11 使用 `ImageDecoder + AnimatedImageDrawable` 原生播放。
-- 保留 `model_frames.zip` 作为解码失败时的逐帧原生备用播放器。
-- “播放 / 暂停 / 重置”是真正的原生动画控制；重置回第 1 帧并恢复 1× 居中。
-- 模特、热力图分别支持原生双指缩放、放大后单指拖动、双击复位。
-- 4 张热力图由 Android Handler 每 1.2 秒轮播；缩放/拖动不会停止轮播。
-- 点击热力视角按钮会跳转到指定视角，约 3 秒后继续自动轮播。
-- 保留横屏、沉浸式全屏、常亮、开机自启。
+- 四个功能区域（3D动态展示、热力分析、恒温科技、温度分布）的原有面板颜色、几何尺寸和内部设计保持不变。
+- 四个功能区域外的背景为纯白色 `#FFFFFF`，外部标题文字使用深灰蓝色 `#414C54`。
+- 原 `36.5` 显示文案已统一改为 `37.5`（包括中英文标题、功能说明和温度色标）。
+- 保留原始 V19 的媒体资源、旋转动画、热力图、按钮、触控缩放、屏幕常亮和开机自启代码。
 
-## 设备诊断页
+## GitHub 上传方法
 
-连续点击左上角主标题 **5 次**，打开隐藏诊断页。请在 86 寸设备上拍下完整诊断页。
+1. **先解压此 ZIP**，不要将 ZIP 原文件直接上传到 GitHub 仓库。
+2. 打开 GitHub 仓库，上传解压得到的内容（`app/`、`build.gradle.kts`、`gradle.properties`、`settings.gradle.kts`、`README.md`、`.gitignore`）。
+3. 所有内容都必须在**仓库根目录**：仓库根目录下应直接存在 `app/build.gradle.kts` 和 `settings.gradle.kts`，不能多一层工程文件夹。
+4. 上传并提交至仓库默认分支。然后在仓库根目录自行创建 `.github/workflows/build-apk.yml`。
+5. 你的 Actions 工作流需先安装 JDK 17、Android SDK、Gradle 8.9，再执行 `gradle :app:assembleDebug --stacktrace`。
+6. Debug APK 默认输出位置：`app/build/outputs/apk/debug/app-debug.apk`。
 
-诊断页包含：
-- Android / 设备型号
-- Real Resolution / App Metrics / Root View
-- density / densityDpi / scaledDensity / fontScale / xdpi / ydpi
-- 系统栏 Insets
-- Android System WebView 包版本
-- 兼容 V18 WebView 行为的 `window.innerWidth / innerHeight / devicePixelRatio / screen.width / screen.height`
+本工程未内置 Gradle Wrapper（与原始 V19 保持一致），需要使用工作流安装的 Gradle 8.9。
 
-点击诊断页任意位置关闭。
+## 工程结构
 
-## GitHub Actions
+```text
+app/
+  build.gradle.kts
+  src/main/
+    AndroidManifest.xml
+    assets/media/             # 120帧模型源素材、Animated WebP、4幅热力图
+    java/com/liufy/thermaldisplay/
+    res/values/
+build.gradle.kts
+settings.gradle.kts
+gradle.properties
+README.md
+.gitignore
+```
 
-你的上传环境会隐藏 `.github` 文件夹，所以工程根目录额外提供了可见文件：
+## 验证说明
 
-`BUILD_APK_WORKFLOW.yml`
-
-如果 GitHub 中没有 `Build APK`：
-1. Add file → Create new file
-2. 文件名输入 `.github/workflows/build-apk.yml`
-3. 将 `BUILD_APK_WORKFLOW.yml` 的完整内容复制进去并 Commit
-4. Actions → Build APK → Run workflow
-
-## 建议测试顺序
-
-1. UI 是否在小米平板和 86 寸屏均保持相同比例且无文字重叠。
-2. 模特是否高清连续旋转，无 GIF 条状拖影。
-3. 暂停、播放、重置是否真实有效。
-4. 模特双指缩放/拖动时动画是否继续。
-5. 热力图双指缩放/拖动后是否继续轮播。
-6. 连续点标题 5 次拍摄设备诊断页。
-7. 断电重启验证开机自启。
+ZIP 结构、资源文件一致性、温度文案扫描及 XML 解析已进行静态检查。尚未使用 Android SDK 进行实际 APK 编译，也未在实机上运行测试；构建结果以 GitHub Actions 为准。
